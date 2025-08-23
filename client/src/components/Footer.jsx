@@ -34,6 +34,7 @@ const Footer = () => {
           <p>Store Locator</p>
           <p>Fabric Glossary</p>
           <p>Blogs</p>
+          <a href="/dashboard"><p>Dashboard</p></a>
         </div>
         
         {/* Newsletter Signup */}
