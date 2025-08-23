@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const Api = axios.create({
-  baseURL: "http://localhost:8081",
+  baseURL: "https://vercel-backend-coral.vercel.app/",
 });
 
 export default Api
