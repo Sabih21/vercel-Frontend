@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 export const getAllProducts = async () => {
   try {
     const response = await Api.get(`/api/v1/get-all-products`);
-    // console.log("Fetched Products:", response.data);
+    console.log("Fetched Products:", response.data);
     return response?.data;
   } catch (error) {
     toast.error(error.response.data.message || "Error in get all product");

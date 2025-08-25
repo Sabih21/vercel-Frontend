@@ -42,7 +42,7 @@ export function NavUser({ user }) {
       const data = await logoutUser(values);
       dispatch(logout());
       persistor.purge();
-      navigate("/login");
+      navigate("/");
       toast.success("Logout successful!");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Invalid credentials");

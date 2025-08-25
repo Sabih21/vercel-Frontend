@@ -8,6 +8,10 @@ import MoreToExploreCarousel from "../components/MoreToExploreCarousel";
 import StyleByYouCarousel from "../components/StyleByYouCarousel.jsx";
 import Navbar from "../components/Navbar.jsx";
 import FooterSection from "../components/Footer.jsx";
+import { useSelector } from "react-redux";
+import {Link} from "react-router-dom"
+// import { Button } from "@/components/ui/button";
+
 
 // SHOP BY CATEGORY data
 const shopCategories = [
@@ -65,8 +69,10 @@ const trendingCategories = [
   },
 ];
 
-
 export default function Home() {
+  const loginUser = useSelector((state) => state.auth);
+  // console.log("loginUser: ", loginUser.user.role);
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState([]);
@@ -76,7 +82,7 @@ export default function Home() {
     getAllProducts().then((res) => {
       if (res.success) {
         // Backend se jo string arrays aa rahe hain unko parse karo
-        // console.log(res.data);
+        // console.log("getAllProducts", res.data);
 
         const formatted = res?.data?.map((p) => ({
           id: p.id,
@@ -109,6 +115,7 @@ export default function Home() {
   // 📂 Categories
   useEffect(() => {
     getAllCategories().then((res) => {
+      // console.log("getAllCategories", res.categories);
       if (res.success) {
         const formattedCats = res?.categories?.map((c) => ({
           id: c.id,
@@ -144,10 +151,7 @@ export default function Home() {
       <WhatsNew />
 
       {/* SHOP BY CATEGORY => ab categories API se aayengi */}
-      <ProductCarousel
-        title="SHOP BY CATEGORY"
-        categories={categories}
-      />
+      <ProductCarousel title="SHOP BY CATEGORY" categories={categories} />
 
       {/* TRENDING => products se hi aayega */}
       <ProductCarousel title="TRENDING" categories={products} />

@@ -35,6 +35,12 @@ export default function AuthModal({ onClose }) {
     setLoading(true);
     try {
       const res = await loginUser(data);
+       if (res.user.role === 1) {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
+      }
+      
       dispatch(login({ user: res.user, token: res.token }));
       reset();
       // navigate("/");

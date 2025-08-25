@@ -42,7 +42,7 @@ export const loginUser = async (itemData) => {
 export const logoutUser = async () => {
   try {
     const response = await Api.post(`/api/v1/logout`);
-    console.log("Response in logout :", response?.data);
+    // console.log("Response in logout :", response?.data);
     toast.success("Logged out 👋");
     return response?.data;
   } catch (error) {

@@ -9,17 +9,24 @@ import Navbar from "../components/Navbar.jsx";
 import FooterSection from "../components/Footer.jsx";
 import ProductCategoryCarousel from "../components/ProductCategoryCarousel.jsx";
 import Sidebar from "../components/Sidebar.jsx";
+import { useSelector, useDispatch } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
+import { setCart } from "../redux/cartSlice.js";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const cart = useSelector((state) => state.cart);
+  console.log("cart: ", cart);
   const [product, setProduct] = useState(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(true);
-  const [isCartOpen, setIsCartOpen] = useState(false); // HANDLE SIDE BAR STATE
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -53,29 +60,56 @@ const ProductDetailPage = () => {
     fetchProduct();
   }, [id]);
 
+  // ✅ LocalStorage helper functions
+  const getGuestSession = () => {
+    const session = localStorage.getItem("guest_session_id");
+    return session ? JSON.parse(session) : null;
+  };
+
+  const setGuestSession = (id) => {
+    localStorage.setItem("guest_session_id", JSON.stringify(id));
+  };
+
   const handleAddToCart = async () => {
+    // ✅ guest session maintain karo
+    const sessionId = user?.id ? null : getGuestSession();
+    console.log("sessionId: ", sessionId);
     try {
       const payload = {
-        // user_id: 1, // TODO: agar user login hai toh actual user_id lo
-        session_id: null, // TODO: agar user login nahi hai toh ek session_id use karo (localStorage se bhi le sakte ho)
+        user_id: user?.id ? user.id : null, // login user ke liye user_id
+        session_id: user?.id ? null : sessionId, // guest ke liye session_id bhejo
+        color: selectedColor || null,
+        size: selectedSize || null,
         items: [
           {
             product_id: product.id || null,
-            quantity: quantity || null,
-            price: product.price || null,
+            quantity: quantity || 1,
+            price: Number(product.price) || 0,
             size: selectedSize || null,
             color: selectedColor || null,
           },
         ],
       };
-   console.log("payload :", payload);
-   
+      // console.log("payload :", payload);
+
       const res = await createCart(payload);
+
+      console.log("response: ", res);
       if (res?.success) {
-        setIsCartOpen(true); // ✅ Sidebar khol do
+        console.log("Response: ", res.cart);
+        // ✅ backend agar naya guest_session bheje to localStorage me save karo
+        if (!user?.id && res.session_id) {
+          setGuestSession(res.session_id);
+        }
+
+        // ✅ cart state ko Redux me save karo
+        dispatch(setCart(res.cart));
+
+        // ✅ cart sidebar open kar do
+        setIsCartOpen(true);
       }
     } catch (error) {
-      console.error("Add to Cart Error:", error);
+      console.error("Add to Cart Error:", error.message);
     }
   };
 
@@ -117,7 +151,7 @@ const ProductDetailPage = () => {
           <div className="w-full md:w-1/2">
             <div className="mb-6">
               <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                {product.tags || "NEW IN"}
+                {product.tags || "N/A"}
               </span>
 
               <div className="flex items-baseline gap-2 mt-2 mb-1">
@@ -133,8 +167,13 @@ const ProductDetailPage = () => {
                   )}
                 </button>
               </div>
+
               <p className="text-1xl font-bold text-black">
                 Rs.{Number(product.price).toFixed(2)}
+              </p>
+              {/* <br /> */}
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                SKU.{product.sku}
               </p>
             </div>
 
@@ -301,73 +340,80 @@ const ProductDetailPage = () => {
               🎉 Congratulations! You get free shipping!
             </p>
 
-            {/* Cart Item */}
-            <div className="flex gap-4 items-start">
-              {/* Product Image */}
-              <img
-                src={`${import.meta.env.VITE_API_URL}${product.productImg[0]}`}
-                alt={product.name}
-                className="w-24 h-28 object-cover rounded"
-              />
+            {/* Cart Items */}
+            {cart?.items?.length > 0 ? (
+              cart.items.map((item) => (
+                <div key={item.id} className="flex gap-4 items-start">
+                  {/* Product Image */}
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}${
+                      item.product?.productImg
+                        ? JSON.parse(item.product.productImg)[0] // 👈 parse first image
+                        : "/fallback.jpg"
+                    }`}
+                    alt={item.product?.name}
+                    className="w-24 h-28 object-cover rounded"
+                  />
 
-              {/* Product Details */}
-              <div className="flex-1">
-                <p className="font-semibold">{product.name}</p>
-                <p className="text-green-600 text-sm">
-                  {product.stock_quantity ? "In Stock" : "N/A"}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Rs.{Number(product.price).toFixed(2)}
-                </p>
+                  {/* Product Details */}
+                  <div className="flex-1">
+                    <p className="font-semibold">{item.product?.name}</p>
+                    <p className="text-green-600 text-sm">
+                      {item.product?.stock_quantity ? "In Stock" : "N/A"}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Rs.{Number(item.price).toFixed(2)}
+                    </p>
 
-                {/* Quantity Control */}
-                <div className="flex items-center gap-3 mt-2">
-                  <button
-                    onClick={decreaseQuantity}
-                    className="px-2 py-1 border rounded hover:bg-gray-200"
-                  >
-                    −
-                  </button>
-                  <span className="px-3">{quantity}</span>
-                  <button
-                    onClick={increaseQuantity}
-                    className="px-2 py-1 border rounded hover:bg-gray-200"
-                  >
-                    +
-                  </button>
-                  {/* TODO IS PAR KAM KARNA HAI */}
-                  {/* Delete */}
-                  <button
-                    onClick={() => {
-                      setQuantity(0); // 👈 yaha delete k logic dal sakta hai
-                    }}
-                    className="text-red-500 ml-4"
-                  >
-                    🗑
-                  </button>
+                    {/* Quantity Control */}
+                    <div className="flex items-center gap-3 mt-2">
+                      <button
+                        onClick={() => handleUpdateQuantity(item, -1)}
+                        className="px-2 py-1 border rounded hover:bg-gray-200"
+                      >
+                        −
+                      </button>
+                      <span className="px-3">{item.quantity}</span>
+                      <button
+                        onClick={() => handleUpdateQuantity(item, 1)}
+                        className="px-2 py-1 border rounded hover:bg-gray-200"
+                      >
+                        +
+                      </button>
+
+                      {/* Delete */}
+                      <button
+                        onClick={() => handleRemoveItem(item)}
+                        className="text-red-500 ml-4"
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-
+              ))
+            ) : (
+              <p className="text-gray-500">Your cart is empty</p>
+            )}
             <br />
             <br />
             <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
+            {/* <br /> */}
 
             {/* Buttons */}
-            <div className="space-y-3">
+            <div className="space-y-3 mt-6">
               {/* Subtotal */}
               <div className="border-t pt-4">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Subtotal:</span>
                   <span>
-                    Rs.{(quantity * Number(product.price)).toFixed(2)}
+                    Rs.
+                    {cart?.items
+                      ?.reduce(
+                        (sum, item) => sum + item.quantity * Number(item.price),
+                        0
+                      )
+                      .toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -378,7 +424,10 @@ const ProductDetailPage = () => {
               >
                 VIEW CART
               </button>
-              <button className="w-full bg-black text-white py-3 rounded-md">
+              <button
+                onClick={() => navigate("/checkout")}
+                className="w-full bg-black text-white py-3 rounded-md"
+              >
                 CHECKOUT
               </button>
               <button
