@@ -81,7 +81,7 @@ export default function DataTable({ data, loading, onEdit, onDelete }) {
 
                       <DialogContent className="max-w-md p-4">
                         <img
-                          src={`http://localhost:8081/uploads/${item.fileUpload}`}
+                          src={`https://dashboard.ebtechnologies.io/uploads/${item.fileUpload}`}
                           alt="Preview"
                           className="w-full h-auto rounded-lg object-contain"
                         />
@@ -91,7 +91,7 @@ export default function DataTable({ data, loading, onEdit, onDelete }) {
 
                   <TableCell>
                     <a
-                      href={`http://localhost:8081/uploads/${item.pdfUpload}`}
+                      href={`https://dashboard.ebtechnologies.io/uploads/${item.pdfUpload}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

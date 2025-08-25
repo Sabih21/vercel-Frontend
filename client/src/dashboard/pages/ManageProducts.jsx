@@ -32,7 +32,7 @@ export default function ManageProducts() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-            const response = await axios.get("http://localhost:8081/api/v1/get-all-products");
+            const response = await axios.get("https://dashboard.ebtechnologies.io/api/v1/get-all-products");
             setProducts(Array.isArray(response.data.data) ? response.data.data : []);
             // console.log(response.data.data);
             } catch (error) {
