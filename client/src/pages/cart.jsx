@@ -5,7 +5,7 @@ import Image from "../assets/bf70bc66-2ee4-47de-8d59-7c9c459f9c78.png";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 const Cart = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const cart = useSelector((state) => state.cart);
   console.log("cart: ", cart);
 
@@ -60,7 +60,13 @@ const Cart = () => {
                   <div className="md:col-span-5 flex items-start">
                     <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 mr-4">
                       <img
-                        src={Image || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"}
+                        src={
+                          item.product?.productImg
+                            ? `${import.meta.env.VITE_API_URL}${
+                                JSON.parse(item.product.productImg)[0]
+                              }`
+                            : "N/A"
+                        }
                         alt={item.product?.name}
                         className="h-full w-full object-cover object-center"
                       />
@@ -124,7 +130,10 @@ const Cart = () => {
                 </span>
               </div>
 
-              <button onClick={() => navigate("/checkout")} className="w-full bg-[#000000] text-white py-4 rounded-md font-medium text-base">
+              <button
+                onClick={() => navigate("/checkout")}
+                className="w-full bg-[#000000] text-white py-4 rounded-md font-medium text-base"
+              >
                 CHECKOUT
               </button>
 

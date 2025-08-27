@@ -14,7 +14,7 @@ const PaymentSuccess = () => {
       window.location.href = "/";
     }
   }, [countdown]);
-
+// d
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br bg-white to-green-50 px-4">
       <motion.div

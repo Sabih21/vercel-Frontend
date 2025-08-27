@@ -43,8 +43,14 @@ const cartSlice = createSlice({
       state.created_at = null;
       state.items = [];
     },
+
+    // ✅ new reducer for removing a single item
+    removeItem: (state, action) => {
+      const id = action.payload;
+      state.items = state.items.filter((item) => item.id !== id);
+    },
   },
 });
 
-export const { setCart, clearCart } = cartSlice.actions;
+export const { setCart, clearCart,removeItem  } = cartSlice.actions;
 export default cartSlice.reducer;

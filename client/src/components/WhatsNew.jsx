@@ -19,7 +19,7 @@ const WhatsNew = () => {
       try {
         const res = await getAllProducts();
         // ✅ filter only whats_new = 1
-        const whatsNewProducts = res?.data?.filter((p) => p.whats_new === 1);
+        const whatsNewProducts = res?.rows?.filter((p) => p.whats_new === 1);
         setProducts(whatsNewProducts || []);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -71,9 +71,9 @@ const WhatsNew = () => {
                     <p className="font-poppins text-lg font-semibold mt-2">
                       {product.name}
                     </p>
-                    <p className="text-gray-600 font-poppins text-sm">
+                    {/* <p className="text-gray-600 font-poppins text-sm">
                       Rs. {Number(product.price).toFixed(2)}
-                    </p>
+                    </p> */}
                   </div>
                 </CarouselItem>
               ))

@@ -19,6 +19,7 @@ import Settings from "./dashboard/pages/Settings";
 import ManageProducts from "./dashboard/pages/ManageProducts.jsx";
 import CreateProduct from "./dashboard/pages/CreateProduct.jsx";
 import ProductDetail from "./dashboard/pages/ProductDetail.jsx";
+import OrdersDetailPage from "./dashboard/pages/OrderDetailPage.jsx";
 import EditProduct from "./dashboard/pages/EditProduct.jsx";
 import Categories from "./dashboard/pages/Categories.jsx";
 import ManageUsers from "./dashboard/pages/Users.jsx";
@@ -33,8 +34,7 @@ import PrivateRoute from "../src/components/pritate-route.jsx";
 // import { SectionCards } from "./components/section-cards.jsx";
 
 export default function App() {
-
-return (
+  return (
     <>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -51,10 +51,11 @@ return (
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="order/:id" element={<OrdersDetailPage />} />
             <Route path="settings" element={<Settings />} />
             <Route path="manage-products" element={<ManageProducts />} />
             <Route path="create-product" element={<CreateProduct />} />
-            <Route path="product" element={<ProductDetail />} />
+            <Route path="product/:id" element={<ProductDetail />} />
             <Route path="edit-product/:id" element={<EditProduct />} />
             <Route path="categories" element={<Categories />} />
             <Route path="users" element={<ManageUsers />} />

@@ -114,7 +114,7 @@ export default function Sidebar() {
                 <span className="text-gray-200">Orders</span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link
                 to="/dashboard/users"
                 className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition-colors"
@@ -143,7 +143,7 @@ export default function Sidebar() {
                 <Settings size={20} className="text-gray-400" />
                 <span className="text-gray-200">Settings</span>
               </Link>
-            </li>
+            </li> */}
           </ul>
         </nav>
 

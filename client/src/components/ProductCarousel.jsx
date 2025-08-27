@@ -33,7 +33,7 @@ const ProductCarousel = ({ title, categories }) => {
       <div ref={carouselRef}>
         <Carousel opts={{ align: "start", loop: true }} className="w-full">
           <CarouselContent className="-ml-2">
-            {categories.map((cat, idx) => (
+            {categories?.map((cat, idx) => (
               <CarouselItem
                 key={idx}
                 className="basis-1/2 sm:basis-1/3 lg:basis-1/4 pl-2"

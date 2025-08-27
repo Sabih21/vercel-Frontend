@@ -84,7 +84,7 @@ export default function Home() {
         // Backend se jo string arrays aa rahe hain unko parse karo
         // console.log("getAllProducts", res.data);
 
-        const formatted = res?.data?.map((p) => ({
+        const formatted = res?.rows?.map((p) => ({
           id: p.id,
           name: p.name,
           price: p.price,
@@ -156,7 +156,7 @@ export default function Home() {
       {/* TRENDING => products se hi aayega */}
       <ProductCarousel title="TRENDING" categories={products} />
 
-      {/* <MoreToExploreCarousel /> */}
+      <MoreToExploreCarousel />
       <StyleByYouCarousel />
       <FooterSection />
     </>

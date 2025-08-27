@@ -7,7 +7,8 @@ export const getAllOrders = async () => {
     const response = await Api.get(`/api/v1/get-all-orders`);
     console.log("Get all orders:", response.data);
     return response?.data;
-  } catch (error) {
+    
+  } catch (error) {   
     console.error("Get orders error:", error?.response?.data || error.message);
   }
 };
@@ -16,7 +17,7 @@ export const getAllOrders = async () => {
 export const guestCheckout = async (itemData) => {
   try {
     const response = await Api.post(`/api/v1/guest-checkout`, itemData);
-    toast.success(response?.data?.message || "Order create ✅");
+    // toast.success(response?.data?.message || "Order create ✅");
     return response?.data;
   } catch (error) {
     console.error(
@@ -42,17 +43,17 @@ export const createOrder = async (itemData) => {
 };
 
 // ✅ Get single cart
-export const getSingleCart = async (cartId) => {
+export const getSingleOrder = async (orderId) => {
   try {
-    const response = await Api.get(`/api/v1/get-single-cart/${cartId}`);
-    console.log("Get single cart:", response.data);
+    const response = await Api.get(`/api/v1/get-single-order/${orderId}`);
+    console.log("Get single order:", response.data);
     return response?.data;
   } catch (error) {
     console.error(
-      "Get single cart error:",
+      "Get single order error:",
       error?.response?.data || error.message
     );
-    toast.error(error?.response?.data?.message || "Cart not found ❌");
+    // toast.error(error?.response?.data?.message || "order not found ❌");
   }
 };
 
@@ -66,6 +67,16 @@ export const updateCart = async (cartId, itemData) => {
   } catch (error) {
     console.error("Update cart error:", error?.response?.data || error.message);
     toast.error(error?.response?.data?.message || "Failed to update cart ❌");
+  }
+};
+
+export const updateOrderStatus = async (orderId, status) => {
+  try {
+    const response = await Api.put(`/api/v1/orders/${orderId}/status`, { status });
+    return response?.data;
+  } catch (error) {
+    console.error("Update order status error:", error?.response?.data || error.message);
+    throw error;
   }
 };
 

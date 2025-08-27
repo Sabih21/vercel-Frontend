@@ -166,23 +166,23 @@ export default function AuthModal({ onClose }) {
             </form>
 
             {/* Divider */}
-            <div className="flex items-center px-6">
+            {/* <div className="flex items-center px-6">
               <hr className="flex-grow border-t border-gray-300" />
               <span className="mx-2 text-xs text-gray-500">
                 OR SIGN IN WITH
               </span>
               <hr className="flex-grow border-t border-gray-300" />
-            </div>
+            </div> */}
 
             {/* Social Logins */}
-            <div className="flex justify-center gap-4 py-4">
+            {/* <div className="flex justify-center gap-4 py-4">
               <button className="p-2 border border-gray-300 rounded">
                 <FcGoogle size={20} />
               </button>
               <button className="p-2 border border-gray-300 rounded text-blue-600">
                 <FaFacebookF size={18} />
               </button>
-            </div>
+            </div> */}
           </>
         ) : (
           /* ---------- REGISTER FORM ---------- */

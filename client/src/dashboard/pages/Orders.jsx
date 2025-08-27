@@ -10,7 +10,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Trash2, MoreVertical } from "lucide-react";
+import { Eye, Trash2, MoreVertical, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   DropdownMenu,
@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getAllOrders } from "../../utils/order-api.js";
+import { getAllOrders, updateOrderStatus } from "../../utils/order-api.js"; // ✅ import update
 import toast from "react-hot-toast";
 
 export default function ManageOrders() {
@@ -50,6 +50,21 @@ export default function ManageOrders() {
     };
     fetchOrders();
   }, []);
+
+  // ✅ Mark order as delivered
+  const markAsDelivered = async (orderId) => {
+    try {
+      await updateOrderStatus(orderId, "completed");
+      toast.success("Order marked as Delivered ✅");
+      setAllOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId ? { ...o, status: "completed" } : o
+        )
+      );
+    } catch (error) {
+      toast.error("Failed to update order ❌");
+    }
+  };
 
   const handleDelete = (orderId) => {
     setOrderToDelete(orderId);
@@ -84,10 +99,10 @@ export default function ManageOrders() {
                   <TableHead>Order ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Phone</TableHead>
-                  {/* <TableHead>Status</TableHead> */}
-                  <TableHead>shipping_Address</TableHead>
+                  <TableHead>Shipping Address</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Payment</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -103,28 +118,32 @@ export default function ManageOrders() {
                     </TableCell>
                     <TableCell>{order.phone_number || "-"}</TableCell>
                     <TableCell>{order.shipping_address || "N/A"}</TableCell>
-                    {/* <TableCell>
-                      <Badge
-                        variant={
-                          order.status === "pending"
-                            ? "secondary"
-                            : order.status === "completed"
-                            ? "default"
-                            : "destructive"
-                        }
-                      >
-                        {order.status}
-                      </Badge>
-                    </TableCell> */}
                     <TableCell>Rs. {order.total_amount}</TableCell>
                     <TableCell className="capitalize">
-                      {order.payment_method.replace("_", " ")}
+                      {order.payment_method === "cash_on_delivery"
+                        ? "Cash on Delivery"
+                        : order.payment_method?.replace("_", " ") ||
+                          "No Payment Method"}
+                    </TableCell>
+                    <TableCell>
+                     <Badge
+                      variant={
+                        order.status === "pending"
+                          ? "secondary"
+                          : order.status === "completed"
+                          ? "destructive"
+                          : "default"
+                      }
+                    >
+                      {order.status === "completed" ? "Delivered" : order.status}
+                    </Badge>
                     </TableCell>
                     <TableCell>
                       {new Date(order.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-2">
+                        {/* View */}
                         <Link to={`/dashboard/order/${order.id}`}>
                           <Button
                             variant="outline"
@@ -134,6 +153,8 @@ export default function ManageOrders() {
                             <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
+
+                        {/* More Options */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -145,6 +166,18 @@ export default function ManageOrders() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            {order.status !== "completed" && (
+                              <DropdownMenuItem
+                                className="text-green-600 focus:text-green-600 focus:bg-green-50"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  markAsDelivered(order.id);
+                                }}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Mark as Delivered
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               className="text-red-600 focus:text-red-600 focus:bg-red-50"
                               onClick={(e) => {
@@ -202,7 +235,10 @@ export default function ManageOrders() {
                   <div>
                     <p className="text-sm text-gray-500">Payment</p>
                     <p className="capitalize">
-                      {order.payment_method.replace("_", " ")}
+                      {order.payment_method === "cash_on_delivery"
+                        ? "Cash on Delivery"
+                        : order.payment_method?.replace("_", " ") ||
+                          "No Payment Method"}
                     </p>
                   </div>
                   <div>
@@ -232,6 +268,18 @@ export default function ManageOrders() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {order.status !== "completed" && (
+                        <DropdownMenuItem
+                          className="text-green-600 focus:text-green-600 focus:bg-green-50"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            markAsDelivered(order.id);
+                          }}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Mark as Delivered
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         className="text-red-600 focus:text-red-600 focus:bg-red-50"
                         onClick={(e) => {

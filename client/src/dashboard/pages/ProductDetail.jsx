@@ -1,12 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { getSingleProduct } from "../../utils/product-api.js";
+import { useParams } from "react-router-dom";
 
 const ProductDetail = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(true);
-  const [quantity, setQuantity] = useState(1);
+  // const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const res = await getSingleProduct(id);
+      if (res?.success) {
+        const p = res.data;
+
+        const parseSafe = (val) => {
+          if (!val) return [];
+          try {
+            let parsed = typeof val === "string" ? JSON.parse(val) : val;
+            if (typeof parsed === "string") parsed = JSON.parse(parsed);
+            return parsed;
+          } catch {
+            return [];
+          }
+        };
+
+        setProduct({
+          ...p,
+          productImg: Array.isArray(p.productImg)
+            ? p.productImg
+            : JSON.parse(p.productImg || "[]"),
+          colors: parseSafe(p.colors),
+          sizes: parseSafe(p.sizes),
+          fabrics: parseSafe(p.fabrics),
+          fits: parseSafe(p.fits),
+        });
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  if (!product) return <p className="text-center py-10">Loading...</p>;
 
   const trendingCategories = [
     {
@@ -52,8 +90,9 @@ const ProductDetail = () => {
 
   const toggleWishlist = () => setIsWishlisted(!isWishlisted);
   const toggleDetails = () => setIsDetailsOpen(!isDetailsOpen);
-  const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () => quantity > 1 && setQuantity((prev) => prev - 1);
+  // const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  // const decreaseQuantity = () =>
+  //   quantity > 1 && setQuantity((prev) => prev - 1);
 
   const handleSizeSelect = (size) => setSelectedSize(size);
   const handleColorSelect = (color) => setSelectedColor(color);
@@ -64,93 +103,124 @@ const ProductDetail = () => {
         {/* Left Column - Product Images */}
         <div className="w-full md:w-1/2">
           <div className="grid grid-cols-2 gap-4">
-            {productImages.map((image, index) => (
-              <div key={index} className="aspect-square overflow-hidden rounded-lg">
-                <img src={image} alt={`Product view ${index + 1}`} className="w-full h-full object-cover" />
-              </div>
-            ))}
+            {Array.isArray(product?.productImg) &&
+            product?.productImg.length > 0 ? (
+              product.productImg.slice(0, 5).map((img, index) => (
+                <div
+                  key={index}
+                  className="aspect-square overflow-hidden rounded-lg"
+                >
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}${img}`}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))
+            ) : (
+              <p>No images available</p>
+            )}
           </div>
         </div>
 
         {/* Right Column - Product Details */}
         <div className="w-full md:w-1/2">
           <div className="mb-6">
-            <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">NEW IN</span>
+            <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              {product.tags || "N/A"}
+            </span>
+
             <div className="flex items-baseline gap-2 mt-2 mb-1">
-              <h1 className="text-2xl font-bold">SPIEGE - EMBROIDERED NET SUIT</h1>
-              <button onClick={toggleWishlist} className="text-xl text-gray-500">
-                {isWishlisted ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
+              <h1 className="text-2xl font-bold">{product.name}</h1>
+              <button
+                onClick={() => setIsWishlisted(!isWishlisted)}
+                className="text-xl text-gray-500"
+              >
+                {isWishlisted ? (
+                  <FaHeart className="text-red-500" />
+                ) : (
+                  <FaRegHeart />
+                )}
               </button>
             </div>
-            <p className="text-1xl font-bold text-black">RS.3,990.00</p>
-          </div>
 
-          <div className="mb-6">
-            <p className="text-gray-700">
-              Make a particular statement with our three-piece plasticite enterprise featuring a blended mix of all flavors with a soft organic quotata and woven mix all textures.
+            <p className="text-1xl font-bold text-black">
+              Rs.{Number(product.price).toFixed(2)}
+            </p>
+            {/* <br /> */}
+            <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              SKU.{product.sku}
             </p>
           </div>
 
           {/* Size Selection */}
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold mb-2">SIZE</h3>
-            <div className="flex flex-wrap gap-2">
-              {sizes.map((size) => (
-                <button
-                  key={size}
-                  className={`px-4 py-2 border rounded-md ${
-                    selectedSize === size ? "bg-black text-white border-black" : "border-gray-300 hover:border-gray-500"
-                  }`}
-                  onClick={() => handleSizeSelect(size)}
-                >
-                  {size}
-                </button>
-              ))}
+          {product.sizes?.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-2">SIZE</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((size) => (
+                  <button
+                    key={size}
+                    className={`px-4 py-2 border rounded-md ${
+                      selectedSize === size
+                        ? "bg-black text-white border-black"
+                        : "border-gray-300 hover:border-gray-500"
+                    }`}
+                    onClick={() => setSelectedSize(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
-            {selectedSize && <p className="mt-2 text-sm text-gray-600">Selected size: <span className="font-medium">{selectedSize}</span></p>}
-          </div>
+          )}
 
           {/* Color Selection */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">COLOR</h3>
-            <div className="flex flex-wrap gap-2">
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  className={`px-4 py-2 border rounded-md ${
-                    selectedColor === color ? "bg-black text-white border-black" : "border-gray-300 hover:border-gray-500"
-                  }`}
-                  onClick={() => handleColorSelect(color)}
-                >
-                  {color}
-                </button>
-              ))}
+          {product.colors?.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">COLOR</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((color) => (
+                  <button
+                    key={color}
+                    className={`px-4 py-2 border rounded-md ${
+                      selectedColor === color
+                        ? "bg-black text-white border-black"
+                        : "border-gray-300 hover:border-gray-500"
+                    }`}
+                    onClick={() => setSelectedColor(color)}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
             </div>
-            {selectedColor && <p className="mt-2 text-sm text-gray-600">Selected color: <span className="font-medium">{selectedColor}</span></p>}
-          </div>
+          )}
 
           {/* Quantity Selector and Add to Cart */}
-          <div className="mt-8 flex items-center gap-4">
+          {/* <div className="mt-8 flex items-center gap-4">
             <div className="flex items-center border border-gray-300 rounded">
-              <button className="px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={decreaseQuantity}>-</button>
-              <span className="px-4 py-2 border-x border-gray-300">{quantity}</span>
-              <button className="px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={increaseQuantity}>+</button>
+              <button
+                className="px-3 py-2 text-lg font-medium hover:bg-gray-100"
+                onClick={decreaseQuantity}
+              >
+                -
+              </button>
+              <span className="px-4 py-2 border-x border-gray-300">
+                {quantity}
+              </span>
+              <button
+                className="px-3 py-2 text-lg font-medium hover:bg-gray-100"
+                onClick={increaseQuantity}
+              >
+                +
+              </button>
             </div>
 
-            <button
-              className={`flex-1 bg-black text-white py-3 px-6 rounded hover:bg-gray-800 transition-colors ${
-                !selectedSize || !selectedColor ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={!selectedSize || !selectedColor}
-            >
-              {selectedSize && selectedColor
-                ? `ADD TO BAG (${quantity}) - ${selectedSize} / ${selectedColor}`
-                : "SELECT SIZE & COLOR"}
-            </button>
-          </div>
+          </div> */}
 
           {/* Toggleable Product Details Section */}
-           <div className="border-t border-b border-gray-200 py-4 mt-8">
+          <div className="border-t border-b border-gray-200 py-4 mt-8">
             <div
               className="flex justify-between items-center cursor-pointer"
               onClick={toggleDetails}
@@ -161,38 +231,61 @@ const ProductDetail = () => {
 
             <div
               className={`overflow-hidden transition-all duration-300 ${
-                isDetailsOpen ? "max-h-96" : "max-h-0"
+                isDetailsOpen ? "max-h-[600px]" : "max-h-0"
               }`}
             >
-              <div className="pt-4 space-y-4">
-                <div>
-                  <h3 className="font-medium">Unutilized 2-Piece Slain</h3>
-                  <ul className="list-disc pl-5 text-gray-600 space-y-1 mt-2">
-                    <li>Door! Promoted! Spiced Net Slain from 100m</li>
-                    <li>Door Bracelet Net Slain: Record & Back 2.5m</li>
-                    <li>Door Thai Slain: Ro 2.0m</li>
-                    <li>Paddle Broccoli Net</li>
-                    <li>Geliver Pistolino</li>
-                  </ul>
-                </div>
+              <div className="pt-4 space-y-4 text-gray-700">
+                {/* Description */}
+                <p>{product.description || "N/A"}</p>
 
-                <div>
-                  <h3 className="font-medium">Deputies</h3>
-                  <ul className="list-disc pl-5 text-gray-600 space-y-1 mt-2">
-                    <li>Zur Original Deputie 2.20m</li>
-                    <li>Paddle Zure Dryerza</li>
-                    <li>Geliver Pistolino</li>
-                  </ul>
-                </div>
+                {/* Brand */}
+                {product.brand && (
+                  <p>
+                    <span className="font-semibold">Brand:</span>{" "}
+                    {product.brand || "N/A"}
+                  </p>
+                )}
 
-                <div>
-                  <h3 className="font-medium">Trouser</h3>
-                  <ul className="list-disc pl-5 text-gray-600 space-y-1 mt-2">
-                    <li>Door Voodoo Blue Slit Project 3.50m</li>
-                    <li>Paddle Voodoo Slit</li>
-                    <li>Geliver Pistolino</li>
-                  </ul>
-                </div>
+                {/* Colors */}
+                {/* {product.colors?.length > 0 && (
+                  <p>
+                    <span className="font-semibold">Colors:</span>{" "}
+                    {product.colors.join(", ") || "N/A"}
+                  </p>
+                )} */}
+
+                {/* Fabrics */}
+                {product.fabrics?.length > 0 && (
+                  <p>
+                    <span className="font-semibold">Fabrics:</span>{" "}
+                    {product.fabrics.join(", ") || "N/A"}
+                  </p>
+                )}
+
+                {/* Fits */}
+                {product.fits?.length > 0 && (
+                  <p>
+                    <span className="font-semibold">Fits:</span>{" "}
+                    {product.fits.join(", ") || "N/A"}
+                  </p>
+                )}
+
+                {/* Sizes */}
+                {/* {product.sizes?.length > 0 && (
+                  <p>
+                    <span className="font-semibold">Available Sizes:</span>{" "}
+                    {product.sizes.join(", ") || "N/A"}
+                  </p>
+                )} */}
+
+                {/* Model Info */}
+                {(product.model_height || product.model_wears) && (
+                  <p>
+                    <span className="font-semibold">Model Info:</span> Height –{" "}
+                    {product.model_height}, Wearing –{" "}
+                    {product.model_wears || "N/A"}
+                  </p>
+                )}
               </div>
             </div>
           </div>
