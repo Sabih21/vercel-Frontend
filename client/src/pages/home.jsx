@@ -81,6 +81,7 @@ export default function Home() {
   useEffect(() => {
     getAllProducts().then((res) => {
       if (res.success) {
+        console.log(res);
         // Backend se jo string arrays aa rahe hain unko parse karo
         // console.log("getAllProducts", res.data);
 
